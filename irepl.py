@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import re
-import configparser
+import tempfile
+import subprocess
+import shutil
 import pygments
 from pygments.lexers import find_lexer_class_by_name
 from pygments.styles import get_style_by_name
@@ -37,6 +39,7 @@ try:
     LANGUAGE = sys.argv[1]
 except IndexError:
     LANGUAGE = "factor"
+
 
 PROMPT = CONFIG[LANGUAGE.upper()]["prompt"]
 LEXER_CLS = find_lexer_class_by_name(CONFIG[LANGUAGE.upper()]["lexer"])
@@ -79,10 +82,23 @@ while True:
             output = re.sub(ansi_escape, "", repl.before)[1:]
         else:
             output = repl.before
+        page = False
+        if (
+            len(re.findall(r"\n", output))
+            > shutil.get_terminal_size().lines - 1
+        ):
+            page = True
+
         formatted_output = pygments.highlight(
             output, LEXER_INS, TerminalTrueColorFormatter(style=STYLE)
         )
-        print(formatted_output)
+        if page:
+            PAGER_FILE = open(tempfile.mkstemp()[1], "w")
+            print(formatted_output, file=PAGER_FILE)
+            PAGER_FILE.flush()
+            subprocess.call(["less", "-R", PAGER_FILE.name])
+        else:
+            print(formatted_output)
     except KeyboardInterrupt:
         print("User interrupt")
         repl.close()
