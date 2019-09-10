@@ -52,7 +52,7 @@ LEXER_INS = LEXER_CLS()
 
 COMPLETER = WordCompleter(build_completion_list(LEXER_CLS))
 
-style_dict = {Token.Prompt: "#85678f"}
+style_dict = {Token.Prompt: "#85678f", Token.Info: "#b294bb bold"}
 
 STYLE = merge_styles(
     [
@@ -62,10 +62,7 @@ STYLE = merge_styles(
 )
 
 
-TEXT = PygmentsTokens([(Token.Prompt, f"({LANGUAGE}):"), (Token.Text, " > ")])
-
 sess = PromptSession(
-    TEXT,
     style=STYLE,
     lexer=PygmentsLexer(LEXER_CLS),
     completer=COMPLETER,
@@ -91,7 +88,21 @@ repl.expect(PROMPT)
 
 while True:
     try:
-        user_in = sess.prompt()
+        if repl.match.groups():
+            info = " ".join([f"({m})" for m in repl.match.groups()])
+            TEXT = PygmentsTokens(
+                [
+                    (Token.Prompt, f"({LANGUAGE}):"),
+                    (Token.Info, info),
+                    (Token.Text, " > "),
+                ]
+            )
+        else:
+            TEXT = PygmentsTokens(
+                [(Token.Prompt, f"({LANGUAGE}):"), (Token.Text, " > ")]
+            )
+
+        user_in = sess.prompt(TEXT)
         repl.sendline(user_in)
         repl.expect(PROMPT)
         if re.search(ansi_escape, repl.before):

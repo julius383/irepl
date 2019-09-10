@@ -20,6 +20,6 @@ FACTOR:
   executable: "/usr/bin/factor-vm -run=readline-listener"
 
 HASKELL:
-  prompt:     "\\w+> "
+  prompt:     "(\\w+)> "
   lexer:      "haskell"
   executable: "/usr/bin/ghci"
