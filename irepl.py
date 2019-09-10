@@ -8,7 +8,10 @@ import pygments
 from pygments.lexers import find_lexer_class_by_name
 from pygments.styles import get_style_by_name
 from pygments.formatters import TerminalTrueColorFormatter
+from pygments.token import Token
+from prompt_toolkit.styles import Style, merge_styles
 from prompt_toolkit.styles.pygments import style_from_pygments_cls
+from prompt_toolkit.styles.pygments import style_from_pygments_dict
 from prompt_toolkit import PromptSession, print_formatted_text
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.lexers import PygmentsLexer
@@ -45,16 +48,29 @@ PROMPT = CONFIG[LANGUAGE.upper()]["prompt"]
 LEXER_CLS = find_lexer_class_by_name(CONFIG[LANGUAGE.upper()]["lexer"])
 EXE = CONFIG[LANGUAGE.upper()]["executable"]
 
-STYLE = get_style_by_name("monokai")
 LEXER_INS = LEXER_CLS()
 
 COMPLETER = WordCompleter(build_completion_list(LEXER_CLS))
 
+style_dict = {Token.Prompt: "#85678f"}
+
+STYLE = merge_styles(
+    [
+        style_from_pygments_cls(get_style_by_name("monokai")),
+        style_from_pygments_dict(style_dict),
+    ]
+)
+
+
+TEXT = PygmentsTokens([(Token.Prompt, f"({LANGUAGE}):"), (Token.Text, " > ")])
+
 sess = PromptSession(
-    f"({LANGUAGE})> ",
-    style=style_from_pygments_cls(STYLE),
+    TEXT,
+    style=STYLE,
     lexer=PygmentsLexer(LEXER_CLS),
     completer=COMPLETER,
+    include_default_pygments_style=False,
+    enable_open_in_editor=True,
 )
 #  https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
 ansi_escape = re.compile(
@@ -90,7 +106,9 @@ while True:
             page = True
 
         formatted_output = pygments.highlight(
-            output, LEXER_INS, TerminalTrueColorFormatter(style=STYLE)
+            output,
+            LEXER_INS,
+            TerminalTrueColorFormatter(style=get_style_by_name("monokai")),
         )
         if page:
             PAGER_FILE = open(tempfile.mkstemp()[1], "w")
