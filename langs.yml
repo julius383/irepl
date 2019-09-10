@@ -1,0 +1,20 @@
+
+PYTHON:
+  prompt : ">>> "
+  lexer : "python"
+  executable : "/usr/bin/python"
+
+CHICKEN:
+  prompt : "#;\\d+> "
+  lexer : "scheme"
+  executable : "/usr/bin/chicken-csi"
+
+RUBY:
+  prompt : "irb\\(main\\):\\d+:\\d+> "
+  lexer : "ruby"
+  executable : "/usr/bin/irb"
+
+FACTOR:
+  prompt: "IN: \\w+ "
+  lexer: "factor"
+  executable: "/usr/bin/factor-vm -run=readline-listener"
