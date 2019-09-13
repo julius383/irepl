@@ -34,7 +34,7 @@ def build_completion_list(lexer):
 
 
 yaml = YAML(typ="safe")
-f = open("langs.yml", "r")
+f = open("/home/kajm/code/Python/Miscellaneous/irepl/langs.yml", "r")
 CONFIG = yaml.load(f)
 f.close()
 
@@ -121,6 +121,7 @@ while True:
             LEXER_INS,
             TerminalTrueColorFormatter(style=get_style_by_name("monokai")),
         )
+        #  https://stackoverflow.com/questions/6728661/paging-output-from-python
         if page:
             PAGER_FILE = open(tempfile.mkstemp()[1], "w")
             print(formatted_output, file=PAGER_FILE)
