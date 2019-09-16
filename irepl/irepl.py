@@ -11,7 +11,7 @@ from pygments.lexers import find_lexer_class_by_name
 from pygments.styles import get_style_by_name
 from pygments.formatters import TerminalTrueColorFormatter
 from pygments.token import Token
-from prompt_toolkit.styles import Style, merge_styles
+from prompt_toolkit.styles import merge_styles
 from prompt_toolkit.styles.pygments import style_from_pygments_cls
 from prompt_toolkit.styles.pygments import style_from_pygments_dict
 from prompt_toolkit import PromptSession
