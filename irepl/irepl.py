@@ -13,6 +13,9 @@ import tty
 import errno
 import shlex
 from itertools import repeat
+from pprint import pprint
+import termios
+import time
 
 import pygments
 from pygments.lexers import find_lexer_class_by_name
@@ -129,43 +132,56 @@ def format_output(output):
         print(formatted_output)
 
 
+#  https://stackoverflow.com/questions/52954248/capture-output-as-a-tty-in-python
 mo, so = pty.openpty()
-me, se = pty.openpty()
+#  me, se = pty.openpty()
 mi, si = pty.openpty()
 
 p = subprocess.Popen(
     shlex.split(LANG_CONFIG["executable"]),
-    bufsize=1,
     stdout=so,
     stdin=si,
-    stderr=se,
-    close_fds=True,
+    stderr=subprocess.PIPE,
 )
-
 
 def read_from(fds):
     ready, _, _ = select(fds, [], [], 0.04)
-    result = dict(zip(fds, repeat(b'')))
+    result = dict(zip(fds, repeat(b"")))
     if ready:
         for fd in ready:
-            data = os.read(fd, 512)
-            if not data:
-                break
-            result[fd] += data
+            data = os.read(fd, 8192)
+            result[fd] = data
     return result
 
 
+def clean_string(string):
+    without_repl = re.sub(LANG_CONFIG["prompt"], "", string)
+    without_escapes = re.sub(ANSI_ESCAPE, "", without_repl)
+    return without_escapes
+
+
+def get_real_output(fds):
+    maybe_output = read_from(fds)
+    text = maybe_output[mo]
+    lines = str(text, "utf-8").splitlines()
+    if (lst := list(filter(lambda x: x, map(clean_string, lines)))) :
+        return str.join(os.linesep, lst)
+
+
+print(f"stdin: {mi} {si}, stdout: {mo} {so}")
+# TODO: Figure out how to fix dir and help functions
+
+# python termios module docs
+new = termios.tcgetattr(si)
+new[3] = new[3] & ~termios.ECHO
+termios.tcsetattr(si, termios.TCSADRAIN, new)
 while True:
-    result = read_from([mo, me])
-    result = read_from([mo, me])
-    if p.poll() is not None:  # select timed-out
-        break
-    if (out := result[mo]):
-        print(f"{out=}")
-        #  format_output(str(out))
-    if (err := result[me]):
-        print(f"{err=}")
-        #  print(str(err), file=sys.stderr)
     user_in = PROMPT.prompt("> ")
-    os.write(mi, str.encode(user_in + "\r\n"))
-    print(f"{user_in=}")
+    os.write(mi, str.encode(f"{user_in}\n", 'utf-8'))
+    # fixes problem of output appearing later than
+    # expression that produces it
+    time.sleep(0.1)
+    ready, _, _ = select([mo], [], [], 0.04)
+    if ready:
+        r = get_real_output([mo])
+        print(f"got {r}")
