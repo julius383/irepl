@@ -2,7 +2,12 @@
 PYTHON:
   prompt:     ">>> "
   lexer:      "python"
-  executable: "/usr/bin/python"
+  executable: "/usr/bin/python -q"
+
+LUA:
+  prompt:     "> "
+  lexer:      "lua"
+  executable: "/usr/bin/lua"
 
 CHICKEN:
   prompt:     "#;\\d+> "
