@@ -2,6 +2,8 @@
 from interactive import InteractiveMixin
 from config import load_config_for
 from wrappedrepl import WrappedRepl
+import os
+import signal
 
 
 class IRepl(InteractiveMixin, WrappedRepl):
@@ -10,6 +12,9 @@ class IRepl(InteractiveMixin, WrappedRepl):
 
 if __name__ == "__main__":
     config = load_config_for("haskell")
-    r = IRepl(config)
-    #  print(dir(r))
-    r.run()
+    try:
+        os.setpgrp()
+        r = IRepl(config)
+        r.run()
+    finally:
+        os.killpg(os.getpgrp(), signal.SIGTERM)
