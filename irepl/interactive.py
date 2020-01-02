@@ -30,9 +30,9 @@ def build_completion_list(lexer):
 
 
 class InteractiveMixin(object):
-    def __init__(self, *args, **kwargs):
-        super(InteractiveMixin, self).__init__(*args, **kwargs)
-        self.config = args[0]
+    def __init__(self, **kwargs):
+        super(InteractiveMixin, self).__init__(**kwargs)
+        self.config = kwargs['config']
         self.initialize_pygments()
         self.initialize_prompt()
 

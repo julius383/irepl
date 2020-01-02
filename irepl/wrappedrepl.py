@@ -35,7 +35,7 @@ def remove_escapes(string):
 
 
 class WrappedRepl(object):
-    def __init__(self, config):
+    def __init__(self, *, config):
         self.config = config
         self.initialize_pty()
         self.start_process()
@@ -57,6 +57,7 @@ class WrappedRepl(object):
             stdin=self.slave_in,
             stderr=subprocess.PIPE,
         )
+        time.sleep(0.5)
         self.get_repl_output()
 
     def clean_string(self, string):
@@ -98,14 +99,3 @@ class WrappedRepl(object):
             output = self.get_repl_output()
             #  print(output, end='')
             self.print_formatted(output)
-
-
-class IRepl(InteractiveMixin, WrappedRepl):
-    pass
-
-
-if __name__ == "__main__":
-    config = load_config_for("haskell")
-    r = IRepl(config)
-    #  print(dir(r))
-    r.run()
