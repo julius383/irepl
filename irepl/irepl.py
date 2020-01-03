@@ -2,7 +2,7 @@
 import os
 import signal
 from interactive import InteractiveMixin
-from client import RemoteMixin
+from remote import RemoteMixin
 from config import load_config_for
 from wrappedrepl import WrappedRepl
 
