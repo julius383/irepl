@@ -28,7 +28,7 @@ ANSI_ESCAPE = re.compile(
 
 
 def remove_escapes(string):
-    if (m := re.search(ANSI_ESCAPE, string)) :
+    if (m := re.search(ANSI_ESCAPE, string)) :  # noqa E203
         if (m.start == 0) or (m.end == len(string) - 1):
             return re.sub(ANSI_ESCAPE, "", remove_escape)
     return string
@@ -43,6 +43,7 @@ class WrappedRepl(object):
     def initialize_pty(self):
         self.master_out, self.slave_out = pty.openpty()
         self.master_in, self.slave_in = pty.openpty()
+        self.master_err, self.slave_err = pty.openpty()
         # python termios module docs
         # remove standard input echo for slave pty
         new = termios.tcgetattr(self.slave_in)
@@ -55,7 +56,7 @@ class WrappedRepl(object):
             exe,
             stdout=self.slave_out,
             stdin=self.slave_in,
-            stderr=subprocess.PIPE,
+            stderr=self.slave_err,
         )
         time.sleep(0.5)
         self.get_repl_output()
@@ -68,19 +69,22 @@ class WrappedRepl(object):
         return input("> ")
 
     def print_formatted(self, text):
-        print(text, end='')
+        print(text, end="")
+
+    def process_stdout(self, text):
+        lines = str(text, "utf-8").splitlines()
+        pre_processed = filter(lambda x: x, map(self.clean_string, lines))
+        if (lst := list(pre_processed)) :  # noqa E203
+            return str.join(os.linesep, lst)
 
     def get_repl_output(self):
         results = self.read_from_slave()
-        output = results[self.master_out]
-        #  return str(output, "utf-8")
-        lines = str(output, "utf-8").splitlines()
-        pre_processed = filter(lambda x: x, map(self.clean_string, lines))
-        if (lst := list(pre_processed)):
-            return str.join(os.linesep, lst)
+        stdout = self.process_stdout(results[self.master_out])
+        stderr = remove_escapes(str(results[self.master_err], "utf-8"))
+        return (stdout, stderr)
 
     def read_from_slave(self):
-        fds = [self.master_out]
+        fds = [self.master_out, self.master_err]
         ready, _, _ = select(fds, [], [], 0.04)
         result = dict(zip(fds, repeat(b"")))
         if ready:
@@ -96,6 +100,9 @@ class WrappedRepl(object):
             # fixes problem of output appearing later than
             # expression that produces it
             time.sleep(0.1)
-            output = self.get_repl_output()
+            output, err = self.get_repl_output()
             #  print(output, end='')
-            self.print_formatted(output)
+            if output:
+                self.print_formatted(output)
+            if err:
+                print(err, end='')
