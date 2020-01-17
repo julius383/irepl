@@ -1,5 +1,6 @@
 [python]
 prompt     = '>>> '
+continuation = '\.\.\.\s+'
 lexer      = "python"
 executable = "/usr/bin/python -q"
 multiline  = []
@@ -9,6 +10,7 @@ multiline  = []
 
 [lua]
 prompt     = '> '
+continuation = '>>\s+'
 lexer      = "lua"
 executable = "/usr/bin/lua"
 multiline  = []
@@ -18,6 +20,7 @@ multiline  = []
 
 [chicken]
 prompt     = '#;\d+> '
+continuation = ''
 lexer      = "scheme"
 executable = "/usr/bin/chicken-csi"
 multiline  = []
@@ -27,6 +30,7 @@ multiline  = []
 
 [ruby]
 prompt     = 'irb\\(main\\):(\d+):\d+> '
+continuation = ''
 lexer      = "ruby"
 executable = "/usr/bin/irb"
 multiline  = []
@@ -36,6 +40,7 @@ multiline  = []
 
 [factor]
 prompt     = 'IN: (\w+) '
+continuation = ''
 lexer      = "factor"
 executable = "/usr/bin/factor-vm -run=readline-listener"
 multiline  = []
@@ -44,7 +49,8 @@ multiline  = []
   init    = ""
 
 [haskell]
-prompt     = '(\w+)> '
+prompt     = '(\w+\s*)+> '
+continuation = 'Prelude\|\s+'
 lexer      = "haskell"
 executable = "/usr/bin/ghci"
 multiline  = [ ':{', ':}' ]
@@ -54,6 +60,7 @@ multiline  = [ ':{', ':}' ]
 
 [javascript]
 prompt     = '> '
+continuation = ''
 lexer      = "javascript"
 executable = "/usr/bin/node"
 multiline  = []

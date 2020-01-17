@@ -11,9 +11,6 @@ from itertools import repeat
 from pprint import pprint
 from select import select
 
-from interactive import InteractiveMixin
-from config import load_config_for
-
 #  https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
 ANSI_ESCAPE = re.compile(
     r"""
@@ -35,10 +32,12 @@ def remove_escapes(string):
 
 
 class WrappedRepl(object):
-    def __init__(self, *, config):
+    def __init__(self, *, config, **kwargs):
         self.config = config
         self.initialize_pty()
         self.start_process()
+        self.extras = None
+        #  self.prompt = self.create_prompt()
 
     def initialize_pty(self):
         self.master_out, self.slave_out = pty.openpty()
@@ -59,21 +58,54 @@ class WrappedRepl(object):
             stderr=self.slave_err,
         )
         time.sleep(0.5)
-        self.get_repl_output()
+        #  self.get_repl_output()
+
+    def create_prompt(self):
+        if self.extras:
+            ex = list(self.extras)
+            ex.append('> ')
+            return ' '.append(ex)
+        else:
+            return '> '
 
     def clean_string(self, string):
-        without_repl = re.sub(self.config["prompt"], "", string)
-        return remove_escapes(without_repl)
+        if string:
+            #  without_repl = re.sub(self.config["prompt"], "", string)
+            return remove_escapes(string)
+        else:
+            return string
+
+    # TODO: Might need more complicated logic for removing continuation
+    # TODO: Possibly merge this and clean_string function
+    def strip_multiline_repl(self, string):
+        if (cont := self.config["continuation"]) :  # noqa E203
+            return re.sub(cont, "", string)
+        else:
+            return string
+
+    def remove_dummy_prompt(self, lines):
+        if lines:
+            if (m := re.match(self.config['prompt'], lines[0])): # noqa E203
+                self.extras = m.groups()
+                return lines[1:]
+            if (m := re.match(self.config['prompt'], lines[-1])): # noqa E203
+                self.extras = m.groups()
+                return lines[:-1]
+        return lines
 
     def get_input(self):
-        return input("> ")
+        return input(self.create_prompt())
 
     def print_formatted(self, text):
         print(text, end="")
 
     def process_stdout(self, text):
         lines = str(text, "utf-8").splitlines()
-        pre_processed = filter(lambda x: x, map(self.clean_string, lines))
+        lines = self.remove_dummy_prompt(lines)
+        without_continuation = map(self.strip_multiline_repl, lines)
+        pre_processed = filter(
+            lambda x: x, map(self.clean_string, without_continuation)
+        )
         if (lst := list(pre_processed)) :  # noqa E203
             return str.join(os.linesep, lst)
 
@@ -101,8 +133,7 @@ class WrappedRepl(object):
             # expression that produces it
             time.sleep(0.1)
             output, err = self.get_repl_output()
-            #  print(output, end='')
             if output:
                 self.print_formatted(output)
             if err:
-                print(err, end='')
+                print(err, end="")

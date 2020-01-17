@@ -14,6 +14,7 @@ class RemoteMixin(object):
     def __init__(self, **kwargs):
         super(RemoteMixin, self).__init__(**kwargs)
         self.config = kwargs['config']
+        self.echo = kwargs['echo']
         self.initialize_listener(
             self.config['lang'],
             kwargs.get('host', "tcp://localhost"),
@@ -32,6 +33,8 @@ class RemoteMixin(object):
 
     def get_input(self):
         print(f"\n--- waiting for input on {self.host}:{self.port}---")
-        s = self.socket.recv_string()
-        print(s)
+        _, s = self.socket.recv_multipart()
+        s = str(s, 'utf-8')
+        if self.echo:
+            print(s)
         return s
