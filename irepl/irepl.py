@@ -3,10 +3,12 @@ import os
 import time
 import signal
 import sys
-from interactive import InteractiveMixin
-from remote import RemoteMixin
-from config import load_config_for
-from wrappedrepl import WrappedRepl
+from .interactive import InteractiveMixin
+from .remote import RemoteMixin
+from .config import load_config_for
+from .wrappedrepl import WrappedRepl
+
+__package__ = 'irepl'
 
 
 class IRepl(InteractiveMixin, WrappedRepl):
