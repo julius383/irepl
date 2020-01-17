@@ -16,9 +16,16 @@ To run enter:
 irepl <language-name>
 ```
 
-To add a new language edit the `langs.yml` file and add
+To add a new language edit the `languages.toml` file and add
+
 * prompt - the prompt of the repl you want to Wrap
-* lexer - which is the pygments lexer for the language(this usually
-  corresponding
-* the executable path
-then run `pip install -U -e .`
+* continuation - which is the prompt during multi-line input prompt if any
+* lexer - which is the pygments lexer for the language(this has the same name
+  as the language)
+* executable - which is command to execute to start the underlying REPL
+* multiline - which is a pair of strings that single the start and end of 
+  multi-line mode in some REPLs
+* files - which consist of `history` and `init` which are the history and 
+  initialization files for the language
+
+Afterwards run `pip install -U -e .`
