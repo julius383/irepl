@@ -8,11 +8,14 @@ import termios
 import time
 import tty
 from itertools import repeat
+import functools
+import operator
 from pprint import pprint
 from select import select
+import regex
 
 #  https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
-ANSI_ESCAPE = re.compile(
+ANSI_ESCAPE = regex.compile(
     r"""
 \x1B    # ESC
     [@-_]   # 7-bit C1 Fe
@@ -20,15 +23,19 @@ ANSI_ESCAPE = re.compile(
     [ -/]*  # Intermediate bytes
     [@-~]   # Final byte
     """,
-    re.VERBOSE,
+    regex.VERBOSE,
 )
 
 
 def remove_escapes(string):
-    if (m := re.search(ANSI_ESCAPE, string)) :  # noqa E203
+    if (m := regex.search(ANSI_ESCAPE, string)) :  # noqa E203
         if (m.start == 0) or (m.end == len(string) - 1):
-            return re.sub(ANSI_ESCAPE, "", remove_escape)
+            return regex.sub(ANSI_ESCAPE, "", remove_escape)
     return string
+
+
+def send(fd, text):
+    os.write(fd, str.encode(f"{text}\n", "utf-8"))
 
 
 class WrappedRepl(object):
@@ -52,21 +59,19 @@ class WrappedRepl(object):
     def start_process(self):
         exe = shlex.split(self.config["executable"])
         self.proc = subprocess.Popen(
-            exe,
-            stdout=self.slave_out,
-            stdin=self.slave_in,
-            stderr=self.slave_err,
+            exe, stdout=self.slave_out, stdin=self.slave_in, stderr=self.slave_err,
         )
         time.sleep(0.5)
-        #  self.get_repl_output()
+        send(self.master_in, '')
+        self.get_repl_output()
 
     def create_prompt(self):
         if self.extras:
             ex = list(self.extras)
-            ex.append('> ')
-            return ' '.append(ex)
+            ex.append("> ")
+            return " ".join(ex)
         else:
-            return '> '
+            return "> "
 
     def clean_string(self, string):
         if string:
@@ -79,19 +84,30 @@ class WrappedRepl(object):
     # TODO: Possibly merge this and clean_string function
     def strip_multiline_repl(self, string):
         if (cont := self.config["continuation"]) :  # noqa E203
-            return re.sub(cont, "", string)
+            return regex.sub(cont, "", string)
         else:
             return string
 
     def remove_dummy_prompt(self, lines):
+        if (self.config["prompt"].startswith('^')):
+            rx = regex.compile(self.config["prompt"])
+        else:
+            rx = regex.compile('^' + self.config["prompt"])
         if lines:
-            if (m := re.match(self.config['prompt'], lines[0])): # noqa E203
-                self.extras = m.groups()
-                return lines[1:]
-            if (m := re.match(self.config['prompt'], lines[-1])): # noqa E203
-                self.extras = m.groups()
-                return lines[:-1]
-        return lines
+            for i in [0, -1]:
+                try:
+                    t = lines[i]
+                    if lines and t:
+                        m = regex.search(rx, t)
+                        if (m):
+                            lines.pop(i)
+                            if rx.groups > 0:
+                                self.extras = functools.reduce(
+                                    operator.add, [m.captures(i) for i in range(1, rx.groups + 1)]
+                                )
+                except IndexError:
+                    continue
+            return lines
 
     def get_input(self):
         return input(self.create_prompt())
@@ -100,14 +116,15 @@ class WrappedRepl(object):
         print(text, end="")
 
     def process_stdout(self, text):
-        lines = str(text, "utf-8").splitlines()
-        lines = self.remove_dummy_prompt(lines)
-        without_continuation = map(self.strip_multiline_repl, lines)
-        pre_processed = filter(
-            lambda x: x, map(self.clean_string, without_continuation)
-        )
-        if (lst := list(pre_processed)) :  # noqa E203
-            return str.join(os.linesep, lst)
+        if text:
+            lines = str(text, "utf-8").splitlines()
+            lines = self.remove_dummy_prompt(lines)
+            without_continuation = map(self.strip_multiline_repl, lines)
+            pre_processed = filter(
+                lambda x: x, map(self.clean_string, without_continuation)
+            )
+            if (lst := list(pre_processed)) :  # noqa E203
+                return str.join(os.linesep, lst)
 
     def get_repl_output(self):
         results = self.read_from_slave()
@@ -128,7 +145,7 @@ class WrappedRepl(object):
     def run(self):
         while True:
             user_input = self.get_input()
-            os.write(self.master_in, str.encode(f"{user_input}\n", "utf-8"))
+            send(self.master_in, user_input)
             # fixes problem of output appearing later than
             # expression that produces it
             time.sleep(0.1)

@@ -35,23 +35,6 @@ def _(event):
     MULTILINE = not MULTILINE
 
 
-#  @bindings.add("(")
-#  def _(event):
-    #  #  print(dir(event))
-    #  event.current_buffer.insert_text("(")
-    #  pos = event.current_buffer.cursor_position
-    #  BRACKETS_Q.put(pos)
-
-
-#  @bindings.add(")")
-#  def _(event):
-    #  prev_pos = BRACKETS_Q.get()
-    #  move = event.current_buffer.cursor_position - prev_pos
-    #  event.current_buffer.cursor_left(move)
-    #  event.current_buffer.cursor_right(move)
-    #  event.current_buffer.insert_text(")")
-
-
 def prompt_continuation(width, line_number, is_soft_wrap):
     return ('.' * (width - 1)) + ':'
 
@@ -71,7 +54,6 @@ class InteractiveMixin(object):
         self.config = kwargs["config"]
         self.initialize_pygments()
         self.initialize_prompttk()
-        #  self.prompt = self.create_prompt()
 
     def initialize_pygments(self):
         prompt_style = {'prompt': "#85678f", 'extras': "#b294bb bold"}

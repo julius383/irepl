@@ -49,7 +49,7 @@ multiline  = []
   init    = ""
 
 [haskell]
-prompt     = '(\w+\s*)+> '
+prompt     = '([^>]+\s?)+> '
 continuation = 'Prelude\|\s+'
 lexer      = "haskell"
 executable = "/usr/bin/ghci"
@@ -67,4 +67,3 @@ multiline  = []
   [javascript.fies]
   history = "~/.node_repl_history"
   init    = ""
-

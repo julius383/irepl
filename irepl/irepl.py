@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 import os
 import time
 import signal
@@ -41,7 +41,6 @@ def main():
     try:
         os.setpgrp()
         r = IRepl(config=c, echo=True)
-        #  print(dir(r))
         r.run()
     except KeyboardInterrupt:
         os.killpg(os.getpgrp(), signal.SIGTERM)
