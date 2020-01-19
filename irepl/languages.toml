@@ -2,7 +2,8 @@
 prompt     = '>>> '
 continuation = '\.\.\.\s+'
 lexer      = "python"
-executable = "/usr/bin/python -q"
+executable = "python3"
+flags      = ['-q']
 multiline  = []
   [python.files]
   history = ".python_history"
@@ -12,7 +13,7 @@ multiline  = []
 prompt     = '> '
 continuation = '>>\s+'
 lexer      = "lua"
-executable = "/usr/bin/lua"
+executable = "lua"
 multiline  = []
   [lua.files]
   history = ".lua_history"
@@ -22,7 +23,7 @@ multiline  = []
 prompt     = '#;\d+> '
 continuation = ''
 lexer      = "scheme"
-executable = "/usr/bin/chicken-csi"
+executable = "chicken-csi"
 multiline  = []
   [chicken.files]
   history = ".chicken-csi_history"
@@ -42,7 +43,8 @@ multiline  = []
 prompt     = 'IN: (\w+) '
 continuation = ''
 lexer      = "factor"
-executable = "/usr/bin/factor-vm -run=readline-listener"
+executable = "factor-vm"
+flags      = ['-run=readline-listener']
 multiline  = []
   [factor.files]
   history = ".factor_history"
@@ -52,7 +54,7 @@ multiline  = []
 prompt     = '([^>]+\s?)+> '
 continuation = 'Prelude\|\s+'
 lexer      = "haskell"
-executable = "/usr/bin/ghci"
+executable = "ghci"
 multiline  = [ ':{', ':}' ]
   [haskell.files]
   history = "~/.haskell_history"
@@ -62,7 +64,7 @@ multiline  = [ ':{', ':}' ]
 prompt     = '> '
 continuation = ''
 lexer      = "javascript"
-executable = "/usr/bin/node"
+executable = "node"
 multiline  = []
   [javascript.fies]
   history = "~/.node_repl_history"

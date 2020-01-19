@@ -57,9 +57,13 @@ class WrappedRepl(object):
         termios.tcsetattr(self.slave_in, termios.TCSADRAIN, new)
 
     def start_process(self):
-        exe = shlex.split(self.config["executable"])
+        exe = self.config["executable"]
+        flags = self.config["flags"]
         self.proc = subprocess.Popen(
-            exe, stdout=self.slave_out, stdin=self.slave_in, stderr=self.slave_err,
+            [exe, *flags],
+            stdout=self.slave_out,
+            stdin=self.slave_in,
+            stderr=self.slave_err,
         )
         time.sleep(0.5)
         send(self.master_in, '')
