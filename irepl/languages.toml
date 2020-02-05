@@ -14,6 +14,7 @@ prompt     = '> '
 continuation = '>>\s+'
 lexer      = "lua"
 executable = "lua"
+flags      = []
 multiline  = []
   [lua.files]
   history = ".lua_history"
@@ -24,6 +25,7 @@ prompt     = '#;\d+> '
 continuation = ''
 lexer      = "scheme"
 executable = "chicken-csi"
+flags      = []
 multiline  = []
   [chicken.files]
   history = ".chicken-csi_history"
@@ -33,7 +35,8 @@ multiline  = []
 prompt     = 'irb\\(main\\):(\d+):\d+> '
 continuation = ''
 lexer      = "ruby"
-executable = "/usr/bin/irb"
+executable = "irb"
+flags      = []
 multiline  = []
   [ruby.files]
   history = ".irb_history"
@@ -55,6 +58,7 @@ prompt     = '([^>]+\s?)+> '
 continuation = 'Prelude\|\s+'
 lexer      = "haskell"
 executable = "ghci"
+flags      = []
 multiline  = [ ':{', ':}' ]
   [haskell.files]
   history = "~/.haskell_history"
@@ -65,6 +69,7 @@ prompt     = '> '
 continuation = ''
 lexer      = "javascript"
 executable = "node"
+flags      = []
 multiline  = []
   [javascript.fies]
   history = "~/.node_repl_history"

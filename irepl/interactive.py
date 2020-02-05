@@ -2,8 +2,6 @@ import re
 import tempfile
 import shutil
 import subprocess
-from queue import Queue
-import time
 from itertools import repeat, starmap
 import operator
 
@@ -23,7 +21,6 @@ import pygments
 
 PAGER_FILE = open(tempfile.mkstemp()[1], "w")
 MULTILINE = False
-BRACKETS_Q = Queue()
 
 bindings = KeyBindings()
 
@@ -36,7 +33,7 @@ def _(event):
 
 
 def prompt_continuation(width, line_number, is_soft_wrap):
-    return ('.' * (width - 1)) + ':'
+    return (' ' * (width - 4)) + '...:'
 
 
 def build_completion_list(lexer):

@@ -9,5 +9,5 @@ setuptools.setup(
     license="MIT",
     packages=setuptools.find_packages(),
     zip_safe=False,
-    entry_points={"console_scripts": ["irepl = irepl.irepl:main", ]},
+    entry_points={"console_scripts": ["irepl = irepl:main", ]},
 )
