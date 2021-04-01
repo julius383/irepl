@@ -3,7 +3,7 @@ ipython-genutils==0.2.0
 pbr==5.4.4
 prompt-toolkit==3.0.2
 ptyprocess==0.6.0
-Pygments==2.4.2
+Pygments==2.7.4
 pyzmq==18.1.1
 regex==2019.12.20
 ruamel.yaml.clib==0.1.2
